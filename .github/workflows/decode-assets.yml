@@ -1,0 +1,23 @@
+name: decode-assets
+on:
+  push:
+    paths: ["assets-b64/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for f in assets-b64/*.b64; do
+            out=$(basename "$f" .b64)
+            base64 -d "$f" > "$out"
+          done
+      - run: |
+          git config user.name "rmx-bot"
+          git config user.email "info@risemetrix.io"
+          git add -A
+          git diff --cached --quiet || git commit -m "Decode binary assets"
+          git push
